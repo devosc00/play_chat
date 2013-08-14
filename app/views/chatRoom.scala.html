@@ -18,6 +18,8 @@
             </div>
             <textarea id="talk"></textarea>
         </div>
+        <textarea id="talkToOne"></textarea>
+       
         <div class="span4">
             <h2>Members</h2>
             <ul id="members">
@@ -37,7 +39,9 @@
                     {text: $("#talk").val()}
                 ))
                 $("#talk").val('')
+            
             }
+
             
             var receiveEvent = function(event) {
                 var data = JSON.parse(event.data)
@@ -74,7 +78,8 @@
                 } 
             }
             
-            $("#talk").keypress(handleReturnKey)  
+            $("#talk").keypress(handleReturnKey) 
+            $("#talkToOne").keypress(handleReturnKey) 
             
             chatSocket.onmessage = receiveEvent
             

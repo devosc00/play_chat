@@ -34,7 +34,7 @@ object Robot {
       30 seconds,
       30 seconds,
       chatRoom,
-      Talk("Robot", "I'm still alive")
+      TalkToOne("Robot", "I'm talk to myself")
     )
   }
   
@@ -90,7 +90,7 @@ class ChatRoom extends Actor {
   
   //var connected = Map.empty[String, Concurrent.Channel[JsValue]]
   var members = Map.empty[String, Concurrent.Channel[JsValue]]
-  val (chatEnumerator, chatChannel) = Concurrent.broadcast[JsValue]
+  //val (chatEnumerator, chatChannel) = Concurrent.broadcast[JsValue]
   
 
   def receive = {
@@ -113,6 +113,10 @@ class ChatRoom extends Actor {
     case Talk(username, text) => {
       notifyAll("talk", username, text)
     }
+
+    case TalkToOne(username, text) => {
+      notifyOne("talk to One", username, text)
+    }
     
     case Quit(username) => {
       members = members - username
@@ -121,7 +125,7 @@ class ChatRoom extends Actor {
     
   }
   
-  def notifyAll(kind: String, user: String, text: String) {
+  def notifyOne(kind: String, user: String, text: String) {
     for(channel <- members.get(user)){
     val msg = JsObject(
       Seq(
@@ -136,12 +140,29 @@ class ChatRoom extends Actor {
     channel.push(msg)
     }
   }
+
+    def notifyAll(kind: String, user: String, text: String) {
+    for(channel <- members.values){
+    val msg = JsObject(
+      Seq(
+        "kind" -> JsString(kind),
+        "user" -> JsString(user),
+        "message" -> JsString(text),
+        "members" -> JsArray(
+          members.keys.toList.map(JsString)
+        )
+      )
+    )
+    channel.push(msg)
+    }
+  }
+
 }
 
 case class Join(username: String)
 case class Quit(username: String)
 case class Talk(username: String, text: String)
 case class NotifyJoin(username: String)
-
+case class TalkToOne(username: String, text: String)
 case class Connected(enumerator:Enumerator[JsValue])
 case class CannotConnect(msg: String)
